@@ -49,32 +49,24 @@ public class MinesweeperGame extends Game {
     }
 
     private void openTile(int x, int y) {
-        if (isInGameField(x, y)) return;
-        if (!isGameStopped && !gameField[y][x].isOpen && !gameField[y][x].isFlag) {
-            if (!isGameStarted) {
-                createMines(x, y);
-                isGameStarted = true;
-            }
-            if (gameField[y][x].isMine) {
-                setCellValueEx(x, y, Color.RED, MINE);
-                gameOver();
-            } else {
-                gameField[y][x].isOpen = true;
-                countClosedTiles--;
-                setCellColor(x, y, Color.MEDIUMSEAGREEN);
-                score += 5;
-                setScore(score);
-                if (gameField[y][x].countMineNeighbors == 0) {
-                    setCellValue(x, y, "");
-                    ArrayList<GameObject> listNeighbors = getNeighbors(gameField[y][x]);
-                    for (GameObject neighbor : listNeighbors) {
-                        if (!neighbor.isOpen) openTile(neighbor.x, neighbor.y);
-                    }
-                } else if (gameField[y][x].countMineNeighbors != 0) {
-                    setCellNumber(x, y, gameField[y][x].countMineNeighbors);
-                }
-                if (countClosedTiles == countMinesOnField || countClosedTiles == 0) win();
-            }
+        if (isInGameField(x, y) || isGameStopped || gameField[y][x].isOpen || gameField[y][x].isFlag) {
+            return;
+        }
+        if (!isGameStarted) {
+            createMines(x, y);
+            isGameStarted = true;
+        }
+        if (gameField[y][x].isMine) {
+            setCellValueEx(x, y, Color.RED, MINE);
+            gameOver();
+        } else {
+            gameField[y][x].isOpen = true;
+            countClosedTiles--;
+            setCellColor(x, y, Color.MEDIUMSEAGREEN);
+            score += 5;
+            setScore(score);
+            checkMineNeighbors(x, y);
+            if (countClosedTiles == countMinesOnField || countClosedTiles == 0) win();
         }
     }
 
@@ -106,6 +98,18 @@ public class MinesweeperGame extends Game {
                     }
                 }
             }
+        }
+    }
+
+    private void checkMineNeighbors(int x, int y) {
+        if (gameField[y][x].countMineNeighbors == 0) {
+            setCellValue(x, y, "");
+            ArrayList<GameObject> listNeighbors = getNeighbors(gameField[y][x]);
+            for (GameObject neighbor : listNeighbors) {
+                if (!neighbor.isOpen) openTile(neighbor.x, neighbor.y);
+            }
+        } else if (gameField[y][x].countMineNeighbors != 0) {
+            setCellNumber(x, y, gameField[y][x].countMineNeighbors);
         }
     }
 
