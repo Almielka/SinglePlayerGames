@@ -21,6 +21,7 @@ public class MinesweeperGame extends Game {
     private int countClosedTiles = SIDE * SIDE;
     private int score;
 
+    @Override
     public void initialize() {
         setScreenSize(SIDE, SIDE);
         createGame();
@@ -34,6 +35,51 @@ public class MinesweeperGame extends Game {
                 setCellColor(x, y, Color.GREY);
             }
         }
+    }
+
+    @Override
+    public void onMouseLeftClick(int x, int y) {
+        if (!isGameStopped) openTile(x, y);
+        else restart();
+    }
+
+    @Override
+    public void onMouseRightClick(int x, int y) {
+        markTile(x, y);
+    }
+
+    private void openTile(int x, int y) {
+        if (isInGameField(x, y)) return;
+        if (!isGameStopped && !gameField[y][x].isOpen && !gameField[y][x].isFlag) {
+            if (!isGameStarted) {
+                createMines(x, y);
+                isGameStarted = true;
+            }
+            if (gameField[y][x].isMine) {
+                setCellValueEx(x, y, Color.RED, MINE);
+                gameOver();
+            } else {
+                gameField[y][x].isOpen = true;
+                countClosedTiles--;
+                setCellColor(x, y, Color.MEDIUMSEAGREEN);
+                score += 5;
+                setScore(score);
+                if (gameField[y][x].countMineNeighbors == 0) {
+                    setCellValue(x, y, "");
+                    ArrayList<GameObject> listNeighbors = getNeighbors(gameField[y][x]);
+                    for (GameObject neighbor : listNeighbors) {
+                        if (!neighbor.isOpen) openTile(neighbor.x, neighbor.y);
+                    }
+                } else if (gameField[y][x].countMineNeighbors != 0) {
+                    setCellNumber(x, y, gameField[y][x].countMineNeighbors);
+                }
+                if (countClosedTiles == countMinesOnField || countClosedTiles == 0) win();
+            }
+        }
+    }
+
+    private boolean isInGameField(int x, int y) {
+        return x < 0 || x >= SIDE || y < 0 || y >= SIDE;
     }
 
     private void createMines(int currentX, int currentY) {
@@ -76,40 +122,6 @@ public class MinesweeperGame extends Game {
         return listNeighbors;
     }
 
-    private void openTile(int x, int y) {
-        if (isInGameField(x, y)) return;
-        if (!isGameStopped && !gameField[y][x].isOpen && !gameField[y][x].isFlag) {
-            if (!isGameStarted) {
-                createMines(x, y);
-                isGameStarted = true;
-            }
-            if (gameField[y][x].isMine) {
-                setCellValueEx(x, y, Color.RED, MINE);
-                gameOver();
-            } else {
-                gameField[y][x].isOpen = true;
-                countClosedTiles--;
-                setCellColor(x, y, Color.MEDIUMSEAGREEN);
-                score += 5;
-                setScore(score);
-                if (gameField[y][x].countMineNeighbors == 0) {
-                    setCellValue(x, y, "");
-                    ArrayList<GameObject> listNeighbors = getNeighbors(gameField[y][x]);
-                    for (GameObject neighbor : listNeighbors) {
-                        if (!neighbor.isOpen) openTile(neighbor.x, neighbor.y);
-                    }
-                } else if (gameField[y][x].countMineNeighbors != 0) {
-                    setCellNumber(x, y, gameField[y][x].countMineNeighbors);
-                }
-                if (countClosedTiles == countMinesOnField || countClosedTiles == 0) win();
-            }
-        }
-    }
-
-    private boolean isInGameField(int x, int y) {
-        return x < 0 || x >= SIDE || y < 0 || y >= SIDE;
-    }
-
     private void markTile(int x, int y) {
         if (!isGameStopped && !gameField[y][x].isOpen) {
             if (!gameField[y][x].isFlag && countFlags != 0) {
@@ -144,17 +156,6 @@ public class MinesweeperGame extends Game {
         setScore(score);
         countMinesOnField = 0;
         createGame();
-    }
-
-    @Override
-    public void onMouseLeftClick(int x, int y) {
-        if (!isGameStopped) openTile(x, y);
-        else restart();
-    }
-
-    @Override
-    public void onMouseRightClick(int x, int y) {
-        markTile(x, y);
     }
 
 }
