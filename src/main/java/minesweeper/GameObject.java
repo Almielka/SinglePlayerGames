@@ -19,4 +19,9 @@ public class GameObject {
         this.isMine = isMine;
     }
 
+    public GameObject(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
 }

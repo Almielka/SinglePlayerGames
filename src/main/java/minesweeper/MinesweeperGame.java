@@ -10,8 +10,8 @@ import java.util.ArrayList;
  */
 
 public class MinesweeperGame extends Game {
-    private static final int SIDE = 9;
-    private final GameObject[][] gameField = new GameObject[SIDE][SIDE];
+    private static final int SIDE = 12;
+    private final GameObject[][] gameField = new GameObject[SIDE + 1][SIDE];
     private int countMinesOnField;
     private static final String MINE = "\uD83D\uDCA3";
     private static final String FLAG = "\uD83D\uDEA9";
@@ -23,18 +23,29 @@ public class MinesweeperGame extends Game {
 
     @Override
     public void initialize() {
-        setScreenSize(SIDE, SIDE);
+        setScreenSize(SIDE, SIDE + 1);
         createGame();
+        createBottomBar();
     }
 
     private void createGame() {
-        for (int x = 0; x < gameField.length; x++) {
-            for (int y = 0; y < gameField[x].length; y++) {
+        for (int x = 0; x < SIDE; x++) {
+            for (int y = 0; y < SIDE; y++) {
                 gameField[y][x] = new GameObject(x, y, false);
                 setCellValue(x, y, "");
                 setCellColor(x, y, Color.GREY);
             }
         }
+    }
+
+    private void createBottomBar() {
+        int y = SIDE;
+        for (int x = 0; x < SIDE; x++) {
+            gameField[y][x] = new GameObject(x, y);
+            setCellColor(x, y, Color.WHITE);
+        }
+        setCellValueEx(0, y, Color.ORANGE, MINE);
+        setCellValueEx(4, y, Color.ORANGE, FLAG);
     }
 
     @Override
@@ -75,8 +86,8 @@ public class MinesweeperGame extends Game {
     }
 
     private void createMines(int currentX, int currentY) {
-        for (int x = 0; x < gameField.length; x++) {
-            for (int y = 0; y < gameField[x].length; y++) {
+        for (int x = 0; x < SIDE; x++) {
+            for (int y = 0; y < SIDE; y++) {
                 if (getRandomNumber(10) < 1 && !gameField[y][x].equals(gameField[currentY][currentX])) {
                     gameField[y][x].isMine = true;
                     countMinesOnField++;
@@ -85,11 +96,17 @@ public class MinesweeperGame extends Game {
         }
         countMineNeighbors();
         countFlags = countMinesOnField;
+        setCellValue(1, SIDE, "" + countMinesOnField);
+        refreshCountFlags();
+    }
+
+    private void refreshCountFlags() {
+        setCellValue(5, SIDE, "" + countFlags);
     }
 
     private void countMineNeighbors() {
-        for (int x = 0; x < gameField.length; x++) {
-            for (int y = 0; y < gameField[x].length; y++) {
+        for (int x = 0; x < SIDE; x++) {
+            for (int y = 0; y < SIDE; y++) {
                 GameObject currentGameObject = gameField[y][x];
                 if (!currentGameObject.isMine) {
                     ArrayList<GameObject> listNeighbors = getNeighbors(currentGameObject);
@@ -131,11 +148,13 @@ public class MinesweeperGame extends Game {
             if (!gameField[y][x].isFlag && countFlags != 0) {
                 gameField[y][x].isFlag = true;
                 countFlags--;
+                refreshCountFlags();
                 setCellValue(x, y, FLAG);
                 setCellColor(x, y, Color.ORANGE);
             } else if (gameField[y][x].isFlag) {
                 gameField[y][x].isFlag = false;
                 countFlags++;
+                refreshCountFlags();
                 setCellValue(x, y, "");
                 setCellColor(x, y, Color.GREY);
             }
