@@ -67,19 +67,17 @@ public class MinesweeperGame extends Game {
         ArrayList<GameObject> listNeighbors = new ArrayList<>();
         for (int x = gameObject.x - 1; x <= gameObject.x + 1; x++) {
             for (int y = gameObject.y - 1; y <= gameObject.y + 1; y++) {
-                try {
-                    if (!gameField[y][x].equals(gameObject)) {
-                        listNeighbors.add(gameField[y][x]);
-                    }
-                } catch (ArrayIndexOutOfBoundsException ignored) {
+                if (isInGameField(x, y)) continue;
+                if (!gameField[y][x].equals(gameObject)) {
+                    listNeighbors.add(gameField[y][x]);
                 }
             }
         }
         return listNeighbors;
     }
 
-
     private void openTile(int x, int y) {
+        if (isInGameField(x, y)) return;
         if (!isGameStopped && !gameField[y][x].isOpen && !gameField[y][x].isFlag) {
             if (!isGameStarted) {
                 createMines(x, y);
@@ -106,6 +104,10 @@ public class MinesweeperGame extends Game {
                 if (countClosedTiles == countMinesOnField || countClosedTiles == 0) win();
             }
         }
+    }
+
+    private boolean isInGameField(int x, int y) {
+        return x < 0 || x >= SIDE || y < 0 || y >= SIDE;
     }
 
     private void markTile(int x, int y) {
