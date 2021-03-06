@@ -16,10 +16,13 @@ public class MinesweeperGame extends Game {
     private static final int SCORE_POINT = 5;
     private static final int MINE_POSITION = 0;
     private static final int MINE_COUNT_POSITION = 1;
-    private static final int FLAG_POSITION = 4;
-    private static final int FLAG_COUNT_POSITION = 5;
+    private static final int FLAG_POSITION = 3;
+    private static final int FLAG_COUNT_POSITION = 4;
+    private static final int POINT_POSITION = 6;
+    private static final int POINT_COUNT_POSITION = 7;
     private static final String MINE = "\uD83D\uDCA3";
     private static final String FLAG = "\uD83D\uDEA9";
+    private static final String POINT = "\uD83C\uDFC6";
 
     private final GameObject[][] gameField = new GameObject[SIDE + 1][SIDE];
     private int countClosedTiles = SIDE * SIDE;
@@ -53,6 +56,8 @@ public class MinesweeperGame extends Game {
         }
         setCellValueEx(MINE_POSITION, y, Color.ORANGE, MINE);
         setCellValueEx(FLAG_POSITION, y, Color.ORANGE, FLAG);
+        setCellValueEx(POINT_POSITION, y, Color.ORANGE, POINT);
+        refreshScore();
     }
 
     @Override
@@ -91,6 +96,7 @@ public class MinesweeperGame extends Game {
         setCellColor(x, y, Color.MEDIUMSEAGREEN);
         score += SCORE_POINT;
         setScore(score);
+        refreshScore();
         checkMineNeighbors(x, y);
         if (countClosedTiles == countMinesOnField) {
             win();
@@ -118,6 +124,10 @@ public class MinesweeperGame extends Game {
 
     private void refreshCountFlags() {
         setCellValue(FLAG_COUNT_POSITION, SIDE, "" + countFlags);
+    }
+
+    private void refreshScore() {
+        setCellValue(POINT_COUNT_POSITION, SIDE, "" + score);
     }
 
     private void countMineNeighbors() {
