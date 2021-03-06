@@ -20,6 +20,7 @@ public class MinesweeperGame extends Game {
     private static final int FLAG_COUNT_POSITION = 4;
     private static final int POINT_POSITION = 6;
     private static final int POINT_COUNT_POSITION = 7;
+    private static final int EXIT_POSITION = 11;
     private static final String MINE = "\uD83D\uDCA3";
     private static final String FLAG = "\uD83D\uDEA9";
     private static final String POINT = "\uD83C\uDFC6";
@@ -58,6 +59,7 @@ public class MinesweeperGame extends Game {
         setCellValueEx(FLAG_POSITION, y, Color.ORANGE, FLAG);
         setCellValueEx(POINT_POSITION, y, Color.ORANGE, POINT);
         refreshScore();
+        setCellValue(EXIT_POSITION, y, "Exit");
     }
 
     @Override
@@ -75,6 +77,9 @@ public class MinesweeperGame extends Game {
     }
 
     private void openTile(int x, int y) {
+        if (x == EXIT_POSITION && y == SIDE) {
+            System.exit(0);
+        }
         if (isInGameField(x, y) || isGameStopped) {
             return;
         }
