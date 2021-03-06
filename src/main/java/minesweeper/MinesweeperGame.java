@@ -40,8 +40,7 @@ public class MinesweeperGame extends Game {
         for (int x = 0; x < SIDE; x++) {
             for (int y = 0; y < SIDE; y++) {
                 gameField[y][x] = new GameObject(x, y, false);
-                setCellValue(x, y, "");
-                setCellColor(x, y, Color.GREY);
+                setCellValueEx(x, y, Color.GREY, "");
             }
         }
     }
@@ -71,11 +70,11 @@ public class MinesweeperGame extends Game {
     }
 
     private void openTile(int x, int y) {
-        if (isInGameField(x, y)) {
+        if (isInGameField(x, y) || isGameStopped) {
             return;
         }
         GameObject gameObject = gameField[y][x];
-        if (isGameStopped || gameObject.isOpen || gameObject.isFlag) {
+        if (gameObject.isOpen || gameObject.isFlag) {
             return;
         }
         if (!isGameStarted) {
@@ -85,16 +84,16 @@ public class MinesweeperGame extends Game {
         if (gameObject.isMine) {
             setCellValueEx(x, y, Color.RED, MINE);
             gameOver();
-        } else {
-            gameObject.isOpen = true;
-            countClosedTiles--;
-            setCellColor(x, y, Color.MEDIUMSEAGREEN);
-            score += SCORE_POINT;
-            setScore(score);
-            checkMineNeighbors(x, y);
-            if (countClosedTiles == countMinesOnField || countClosedTiles == 0) {
-                win();
-            }
+            return;
+        }
+        countClosedTiles--;
+        gameObject.isOpen = true;
+        setCellColor(x, y, Color.MEDIUMSEAGREEN);
+        score += SCORE_POINT;
+        setScore(score);
+        checkMineNeighbors(x, y);
+        if (countClosedTiles == countMinesOnField) {
+            win();
         }
     }
 
@@ -124,11 +123,11 @@ public class MinesweeperGame extends Game {
     private void countMineNeighbors() {
         for (int x = 0; x < SIDE; x++) {
             for (int y = 0; y < SIDE; y++) {
-                GameObject currentGameObject = gameField[y][x];
-                if (!currentGameObject.isMine) {
-                    for (GameObject neighbor : getNeighbors(currentGameObject)) {
+                GameObject gameObject = gameField[y][x];
+                if (!gameObject.isMine) {
+                    for (GameObject neighbor : getNeighbors(gameObject)) {
                         if (neighbor.isMine) {
-                            currentGameObject.countMineNeighbors++;
+                            gameObject.countMineNeighbors++;
                         }
                     }
                 }
@@ -137,15 +136,16 @@ public class MinesweeperGame extends Game {
     }
 
     private void checkMineNeighbors(int x, int y) {
-        if (gameField[y][x].countMineNeighbors == 0) {
+        GameObject gameObject = gameField[y][x];
+        if (gameObject.countMineNeighbors == 0) {
             setCellValue(x, y, "");
-            for (GameObject neighbor : getNeighbors(gameField[y][x])) {
+            for (GameObject neighbor : getNeighbors(gameObject)) {
                 if (!neighbor.isOpen) {
                     openTile(neighbor.x, neighbor.y);
                 }
             }
-        } else if (gameField[y][x].countMineNeighbors != 0) {
-            setCellNumber(x, y, gameField[y][x].countMineNeighbors);
+        } else {
+            setCellNumber(x, y, gameObject.countMineNeighbors);
         }
     }
 
@@ -163,27 +163,23 @@ public class MinesweeperGame extends Game {
     }
 
     private void markTile(int x, int y) {
-        if (isInGameField(x, y)) {
+        if (isInGameField(x, y) || isGameStopped) {
             return;
         }
         GameObject gameObject = gameField[y][x];
-        if (isGameStopped || gameObject.isOpen) {
+        if (gameObject.isOpen || (countFlags == 0 && !gameObject.isFlag)) {
             return;
         }
-        if (!gameObject.isFlag && countFlags != 0) {
-            gameObject.isFlag = true;
-            countFlags--;
-            refreshCountFlags();
-            setCellValue(x, y, FLAG);
-            setCellColor(x, y, Color.ORANGE);
-        } else if (gameObject.isFlag) {
-            gameObject.isFlag = false;
+        if (gameObject.isFlag) {
             countFlags++;
-            refreshCountFlags();
-            setCellValue(x, y, "");
-            setCellColor(x, y, Color.GREY);
+            gameObject.isFlag = false;
+            setCellValueEx(x, y, Color.GREY, "");
+        } else {
+            countFlags--;
+            gameObject.isFlag = true;
+            setCellValueEx(x, y, Color.ORANGE, FLAG);
         }
-
+        refreshCountFlags();
     }
 
     private void gameOver() {
