@@ -18,6 +18,14 @@ We have a game board divided into squares. Some of them contain "mines", but we 
 Added:
 - The first move will never hit a mine
 - Even if the flags are over, added the ability to remove any flag for its further use.
+- Bottom Bar with statistic Mines, Flags and Score
+- Button exit
+
+Mouse control:
+- Left mouse click for trying to open the cell
+- Right mouse click for using flags
+- At the end of the game left mouse click for restart
+- At the end of the game left mouse click on the Exit button for exit
 
 
 ### Snake
